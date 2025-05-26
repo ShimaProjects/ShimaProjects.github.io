@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shima Adapter</title>
+    <title>Shima Project</title>
     <style>
         :root {
-            --bg-color: #0a0a0a;
+            --bg-color: #000000;
             --card-bg: #111111;
             --text-color: #e0e0e0;
-            --accent-color: #6a5acd; /* SlateBlue */
+            --accent-color: #6a5acd;
             --accent-hover: #7b68ee;
-            --border-color: #333333;
+            --border-color: #222222;
         }
 
         * {
@@ -26,10 +26,13 @@
             color: var(--text-color);
             line-height: 1.6;
             padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(106, 90, 205, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(106, 90, 205, 0.05) 0%, transparent 20%);
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
@@ -37,95 +40,105 @@
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         h1 {
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-            color: var(--accent-color);
-            font-weight: 500;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #6a5acd, #9370db);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
         }
 
         .subtitle {
-            color: #999;
-            font-size: 1rem;
+            color: #777;
+            font-size: 0.9rem;
         }
 
-        .card-grid {
+        .links-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }
 
-        .card {
+        .link-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 20px;
+            padding: 18px;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
         }
 
-        .card:hover {
+        .link-card:hover {
             border-color: var(--accent-color);
-            transform: translateY(-3px);
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: var(--accent-color);
-        }
-
-        .card-content {
-            color: #ccc;
-            font-size: 0.95rem;
-        }
-
-        .btn {
-            display: inline-block;
-            background: var(--accent-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-
-        .btn:hover {
-            background: var(--accent-hover);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.1);
         }
 
-        .status {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
+        .link-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(106, 90, 205, 0.2);
             border-radius: 50%;
-            margin-right: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-size: 1.2rem;
         }
 
-        .status-online {
-            background: #00ff7f;
-            box-shadow: 0 0 8px #00ff7f;
+        .link-content {
+            flex-grow: 1;
         }
 
-        .status-offline {
-            background: #ff4500;
+        .link-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .link-emoji {
+            margin-left: 8px;
+            font-size: 0.9rem;
+        }
+
+        .link-url {
+            color: #aaa;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .flag-placeholder {
+            height: 30px;
+            background: rgba(106, 90, 205, 0.1);
+            border-radius: 4px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 0.8rem;
+            border: 1px dashed #333;
         }
 
         @media (max-width: 768px) {
-            .card-grid {
-                grid-template-columns: 1fr;
+            .container {
+                max-width: 100%;
             }
             
             h1 {
                 font-size: 1.8rem;
+            }
+            
+            .link-card {
+                padding: 15px;
             }
         }
     </style>
@@ -133,78 +146,54 @@
 <body>
     <div class="container">
         <header>
-            <h1>Shima Adapter</h1>
-            <p class="subtitle">Минималистичный интерфейс для ShimaProject</p>
+            <h1>SHIMA PROJECT</h1>
+            <p class="subtitle">Докерский проект</p>
         </header>
 
-        <div class="card-grid">
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="status status-online"></span>
-                    Основной сервер
-                </h3>
-                <div class="card-content">
-                    <p>IP: shimaproject.net</p>
-                    <p>Версия: 1.18.2</p>
-                    <p>Игроков: 127/200</p>
-                    <a href="#" class="btn">Подключиться</a>
+        <div class="links-grid">
+            <a href="https://t.me/ShimaAttack" class="link-card" target="_blank">
+                <div class="link-icon">L</div>
+                <div class="link-content">
+                    <div class="link-title">SHIMA ADAPTER <span class="link-emoji">😉</span></div>
+                    <div class="link-url">t.me/ShimaAttack</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="status status-online"></span>
-                    Творческий сервер
-                </h3>
-                <div class="card-content">
-                    <p>IP: creative.shimaproject.net</p>
-                    <p>Версия: 1.18.2</p>
-                    <p>Игроков: 42/100</p>
-                    <a href="#" class="btn">Подключиться</a>
+            <a href="https://t.me/+hj480VhOjIFhMzU0" class="link-card" target="_blank">
+                <div class="link-icon">L</div>
+                <div class="link-content">
+                    <div class="link-title">SHIMA CHANNEL <span class="link-emoji">🏴‍☠️</span></div>
+                    <div class="link-url">t.me/+hj480VhOjIFhMzU0</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="status status-offline"></span>
-                    Хардкорный режим
-                </h3>
-                <div class="card-content">
-                    <p>IP: hardcore.shimaproject.net</p>
-                    <p>Версия: 1.19.4</p>
-                    <p>Сервер на технических работах</p>
-                    <button class="btn" disabled>Недоступно</button>
+            <a href="https://t.me/boost?c=2515069880" class="link-card" target="_blank">
+                <div class="link-icon">L</div>
+                <div class="link-content">
+                    <div class="link-title">BOOST SHIMA <span class="link-emoji">😉</span></div>
+                    <div class="link-url">t.me/boost?c=2515069880</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="card">
-                <h3 class="card-title">Discord</h3>
-                <div class="card-content">
-                    <p>Присоединяйтесь к нашему Discord-сообществу</p>
-                    <p>Участников: 1250+</p>
-                    <a href="#" class="btn">Присоединиться</a>
+            <a href="https://t.me/+5L07CLn3bOgyYjc8" class="link-card" target="_blank">
+                <div class="link-icon">L</div>
+                <div class="link-content">
+                    <div class="link-title">SHIMA CHAT <span class="link-emoji">🥇</span></div>
+                    <div class="link-url">t.me/+5L07CLn3bOgyYjc8</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="card">
-                <h3 class="card-title">Правила</h3>
-                <div class="card-content">
-                    <p>1. Не использовать читы</p>
-                    <p>2. Уважать других игроков</p>
-                    <p>3. Не гриферить постройки</p>
-                    <a href="#" class="btn">Читать полностью</a>
+            <a href="https://t.me/addemoji/ShimaAttack" class="link-card" target="_blank">
+                <div class="link-icon">L</div>
+                <div class="link-content">
+                    <div class="link-title">SHIMA EMOJI <span class="link-emoji">😉</span></div>
+                    <div class="link-url">t.me/addemoji/ShimaAttack</div>
                 </div>
-            </div>
+            </a>
+        </div>
 
-            <div class="card">
-                <h3 class="card-title">Статистика</h3>
-                <div class="card-content">
-                    <p>Всего игроков: 2450</p>
-                    <p>Онлайн за 24ч: 780</p>
-                    <p>Сервер работает: 127 дней</p>
-                    <a href="#" class="btn">Подробнее</a>
-                </div>
-            </div>
+        <div class="flag-placeholder">
+            Анимированный флаг будет здесь
         </div>
     </div>
 </body>
