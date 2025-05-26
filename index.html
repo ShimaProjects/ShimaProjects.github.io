@@ -7,12 +7,14 @@
     <style>
         :root {
             --bg-color: #000000;
-            --card-bg: rgba(15, 0, 0, 0.6);
+            --card-bg: rgba(20, 0, 0, 0.7);
             --text-color: #e0e0e0;
             --accent-color: #ff0000;
             --accent-hover: #ff3333;
             --neon-glow: 0 0 15px rgba(255, 0, 0, 0.7), 0 0 30px rgba(255, 0, 0, 0.4);
-            --neon-glow-intense: 0 0 20px rgba(255, 0, 0, 0.9), 0 0 40px rgba(255, 0, 0, 0.6);
+            --neon-glow-intense: 0 0 25px rgba(255, 0, 0, 0.9), 0 0 50px rgba(255, 0, 0, 0.6);
+            --hell-orange: #ff4500;
+            --hell-yellow: #ff8c00;
         }
 
         * {
@@ -38,12 +40,72 @@
             min-height: 100vh;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.03) 0%, transparent 25%),
+                radial-gradient(circle at 20% 30%, rgba(255, 69, 0, 0.03) 0%, transparent 25%),
                 radial-gradient(circle at 80% 70%, rgba(255, 0, 0, 0.03) 0%, transparent 25%);
             position: relative;
         }
 
-        /* Анимированная текстура "трещин ада" */
+        /* Лоадер (адский куб) */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        .hell-cube {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateHell 5s infinite linear;
+        }
+
+        .hell-cube-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--hell-orange);
+            box-shadow: inset 0 0 20px var(--hell-yellow), 0 0 10px var(--hell-orange);
+            background: rgba(255, 69, 0, 0.1);
+            opacity: 0.8;
+        }
+
+        .hell-cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(40px); }
+        .hell-cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(40px); }
+        .hell-cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(40px); }
+        .hell-cube-face:nth-child(4) { transform: rotateY(270deg) translateZ(40px); }
+        .hell-cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(40px); }
+        .hell-cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(40px); }
+
+        @keyframes rotateHell {
+            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        }
+
+        .loader-text {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: var(--hell-orange);
+            text-shadow: 0 0 10px var(--hell-yellow);
+            letter-spacing: 2px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Анимированная текстура "лавовых трещин" */
         .hell-cracks {
             position: fixed;
             top: 0;
@@ -51,8 +113,8 @@
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(45deg, transparent 65%, rgba(255, 0, 0, 0.02) 65%, transparent 70%),
-                linear-gradient(-45deg, transparent 65%, rgba(255, 0, 0, 0.02) 65%, transparent 70%);
+                linear-gradient(45deg, transparent 65%, rgba(255, 69, 0, 0.03) 65%, transparent 70%),
+                linear-gradient(-45deg, transparent 65%, rgba(255, 0, 0, 0.03) 65%, transparent 70%);
             background-size: 50px 50px;
             z-index: -1;
             animation: crackMove 60s infinite linear;
@@ -70,9 +132,15 @@
             padding: 40px 20px;
             position: relative;
             z-index: 1;
+            opacity: 0;
+            animation: fadeIn 1s forwards 3s;
         }
 
-        /* Заголовок с эффектом "кровавого металла" */
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Заголовок с эффектом "раскаленного металла" */
         header {
             text-align: center;
             margin-bottom: 60px;
@@ -84,7 +152,7 @@
             font-weight: 700;
             letter-spacing: 3px;
             color: transparent;
-            background: linear-gradient(90deg, #ff0000, #cc0000, #ff0000);
+            background: linear-gradient(90deg, var(--hell-orange), var(--accent-color), var(--hell-yellow));
             -webkit-background-clip: text;
             background-clip: text;
             text-shadow: var(--neon-glow);
@@ -105,28 +173,29 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        /* Эффект "кровавой реки" под заголовком */
-        .blood-river {
+        /* Эффект "лавовой реки" под заголовком */
+        .lava-river {
             width: 300px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #ff0000, transparent);
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--hell-orange), var(--accent-color), transparent);
             margin: 20px auto;
             position: relative;
             overflow: hidden;
+            border-radius: 3px;
         }
 
-        .blood-river::after {
+        .lava-river::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.7), transparent);
-            animation: riverFlow 3s infinite linear;
+            background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.7), rgba(255, 0, 0, 0.7), transparent);
+            animation: lavaFlow 3s infinite linear;
         }
 
-        @keyframes riverFlow {
+        @keyframes lavaFlow {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
@@ -142,7 +211,7 @@
         .inferno-button {
             position: relative;
             background: var(--card-bg);
-            border: 1px solid rgba(255, 0, 0, 0.3);
+            border: 1px solid rgba(255, 69, 0, 0.3);
             border-radius: 8px;
             padding: 25px;
             text-align: center;
@@ -161,7 +230,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 0, 0, 0.1), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255, 69, 0, 0.1), transparent);
             transform: rotate(45deg);
             z-index: -1;
             transition: all 0.5s ease;
@@ -170,7 +239,7 @@
         .inferno-button:hover {
             transform: translateY(-5px);
             border-color: var(--accent-color);
-            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(255, 69, 0, 0.5);
         }
 
         .inferno-button:hover::before {
@@ -185,7 +254,7 @@
         .button-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: var(--accent-color);
+            color: var(--hell-orange);
             margin-bottom: 10px;
             letter-spacing: 1px;
             font-family: 'Orbitron', sans-serif;
@@ -202,20 +271,21 @@
         .demon-eye {
             width: 100px;
             height: 100px;
-            background: radial-gradient(circle, #ff0000 0%, #800000 70%, transparent 80%);
+            background: radial-gradient(circle, var(--accent-color) 0%, #800000 70%, transparent 80%);
             border-radius: 50%;
             position: fixed;
             bottom: 30px;
             right: 30px;
-            filter: blur(2px) drop-shadow(0 0 10px #ff0000);
+            filter: blur(2px) drop-shadow(0 0 15px var(--accent-color));
             animation: eyePulse 4s infinite alternate;
             opacity: 0.3;
             z-index: -1;
         }
 
         @keyframes eyePulse {
-            0% { transform: scale(1); opacity: 0.3; }
-            100% { transform: scale(1.1); opacity: 0.5; }
+            0% { transform: scale(1); opacity: 0.3; filter: blur(2px) drop-shadow(0 0 10px var(--accent-color)); }
+            50% { filter: blur(3px) drop-shadow(0 0 20px var(--hell-orange)); }
+            100% { transform: scale(1.1); opacity: 0.5; filter: blur(2px) drop-shadow(0 0 15px var(--accent-color)); }
         }
 
         /* Адаптивность */
@@ -235,7 +305,20 @@
     </style>
 </head>
 <body>
-    <!-- Текстура "трещин ада" -->
+    <!-- Лоадер -->
+    <div class="loader" id="loader">
+        <div class="hell-cube">
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+        </div>
+        <div class="loader-text">ЗАГРУЗКА АДА...</div>
+    </div>
+
+    <!-- Текстура "лавовых трещин" -->
     <div class="hell-cracks"></div>
 
     <!-- Глаз демона (фон) -->
@@ -245,43 +328,77 @@
         <header>
             <h1>SHIMA</h1>
             <p class="subtitle">ИНФЕРНАЛЬНЫЙ ИНТЕРФЕЙС</p>
-            <div class="blood-river"></div>
+            <div class="lava-river"></div>
         </header>
 
         <div class="button-grid">
-            <div class="inferno-button" onclick="location.href='https://t.me/ShimaAttack'">
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/ShimaAttack')">
                 <div class="button-title">АДАПТЕР</div>
                 <div class="button-desc">Наш публичный адаптер со всеми ссылками</div>
             </div>
 
-            <div class="inferno-button" onclick="location.href='https://t.me/+hj480VhOjIFhMzU0'">
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/+hj480VhOjIFhMzU0')">
                 <div class="button-title">КАНАЛ</div>
                 <div class="button-desc">Все главное тут</div>
             </div>
 
-            <div class="inferno-button" onclick="location.href='https://t.me/boost?c=2515069880'">
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/boost?c=2515069880')">
                 <div class="button-title">БУСТ</div>
                 <div class="button-desc">Поддержать нас</div>
             </div>
 
-            <div class="inferno-button" onclick="location.href='https://t.me/+5L07CLn3bOgyYjc8'">
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/+5L07CLn3bOgyYjc8')">
                 <div class="button-title">ЧАТ</div>
                 <div class="button-desc">Наш чат для обсуждения</div>
             </div>
 
-            <div class="inferno-button" onclick="location.href='https://t.me/addemoji/ShimaAttack'">
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/addemoji/ShimaAttack')">
                 <div class="button-title">EMOJI</div>
                 <div class="button-desc">Наши премиум эмодзи</div>
             </div>
 
-            <div class="inferno-button" onclick="showSecret()">
-                <div class="button-title">СЕКРЕТ</div>
-                <div class="button-desc">Только для избранных...</div>
+            <div class="inferno-button" onclick="loadThenAction()">
+                <div class="button-title">Shima</div>
+                <div class="button-desc">Лучший проект по наказанию скамеров</div>
             </div>
         </div>
     </div>
 
     <script>
+        // Скрываем лоадер через 3 секунды
+        setTimeout(() => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+            }, 500);
+        }, 3000);
+
+        // Функция загрузки + редирект
+        function loadThenRedirect(url) {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            
+            setTimeout(() => {
+                window.location.href = url;
+            }, 2000);
+        }
+
+        // Функция загрузки + действие
+        function loadThenAction() {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    alert("Добро пожаловать в ад...");
+                }, 500);
+            }, 2000);
+        }
+
         // Анимация кнопок при загрузке
         document.addEventListener('DOMContentLoaded', () => {
             const buttons = document.querySelectorAll('.inferno-button');
@@ -292,11 +409,6 @@
                 }, 100 * index);
             });
         });
-
-        // Секретная функция
-        function showSecret() {
-            alert("Доступ только по приглашению...");
-        }
     </script>
 </body>
 </html>
