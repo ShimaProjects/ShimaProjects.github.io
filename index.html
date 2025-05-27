@@ -1,496 +1,414 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="user-scalable=no">
-    <title>volumeshader_bm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHIMA | Inferno Interface</title>
     <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: rgba(20, 0, 0, 0.7);
+            --text-color: #e0e0e0;
+            --accent-color: #ff0000;
+            --accent-hover: #ff3333;
+            --neon-glow: 0 0 15px rgba(255, 0, 0, 0.7), 0 0 30px rgba(255, 0, 0, 0.4);
+            --neon-glow-intense: 0 0 25px rgba(255, 0, 0, 0.9), 0 0 50px rgba(255, 0, 0, 0.6);
+            --hell-orange: #ff4500;
+            --hell-yellow: #ff8c00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', 'Rajdhani', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Orbitron';
+            src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+        }
+
+        @font-face {
+            font-family: 'Rajdhani';
+            src: url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+        }
+
         body {
-            background: #131115;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 69, 0, 0.03) 0%, transparent 25%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 0, 0.03) 0%, transparent 25%);
+            position: relative;
         }
-        #c1 {
-            background: #fbf7fe;
-        }
-        #btn {
+
+        /* Лоадер (адский куб) */
+        .loader {
             position: fixed;
-            left: 0px;
-            top: 0px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
         }
-        #c1 {
-            position: fixed;
-            left: 0px;
-            top: 0px;
+
+        .hell-cube {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateHell 5s infinite linear;
         }
-        #main {
-            transform-origin: 0px 0px;
-            position: fixed;
-            left: 0px;
-            top: 0px;
+
+        .hell-cube-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--hell-orange);
+            box-shadow: inset 0 0 20px var(--hell-yellow), 0 0 10px var(--hell-orange);
+            background: rgba(255, 69, 0, 0.1);
+            opacity: 0.8;
         }
-        #config {
+
+        .hell-cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(40px); }
+        .hell-cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(40px); }
+        .hell-cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(40px); }
+        .hell-cube-face:nth-child(4) { transform: rotateY(270deg) translateZ(40px); }
+        .hell-cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(40px); }
+        .hell-cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(40px); }
+
+        @keyframes rotateHell {
+            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        }
+
+        .loader-text {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: var(--hell-orange);
+            text-shadow: 0 0 10px var(--hell-yellow);
+            letter-spacing: 2px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Анимированная текстура "лавовых трещин" */
+        .hell-cracks {
             position: fixed;
-            left: 0px;
-            top: 30px;
-            display: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, transparent 65%, rgba(255, 69, 0, 0.03) 65%, transparent 70%),
+                linear-gradient(-45deg, transparent 65%, rgba(255, 0, 0, 0.03) 65%, transparent 70%);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: crackMove 60s infinite linear;
+        }
+
+        @keyframes crackMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 1000px 1000px; }
+        }
+
+        /* Главный контейнер */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            animation: fadeIn 1s forwards 3s;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Заголовок с эффектом "раскаленного металла" */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: transparent;
+            background: linear-gradient(90deg, var(--hell-orange), var(--accent-color), var(--hell-yellow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: var(--neon-glow);
+            margin-bottom: 15px;
+            animation: textPulse 3s infinite alternate;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @keyframes textPulse {
+            0% { opacity: 0.9; text-shadow: var(--neon-glow); }
+            100% { opacity: 1; text-shadow: var(--neon-glow-intense); }
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Эффект "лавовой реки" под заголовком */
+        .lava-river {
+            width: 300px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--hell-orange), var(--accent-color), transparent);
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 3px;
+        }
+
+        .lava-river::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.7), rgba(255, 0, 0, 0.7), transparent);
+            animation: lavaFlow 3s infinite linear;
+        }
+
+        @keyframes lavaFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Сетка кнопок (ультра-стильные) */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .inferno-button {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .inferno-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 69, 0, 0.1), transparent);
+            transform: rotate(45deg);
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+
+        .inferno-button:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 30px rgba(255, 69, 0, 0.5);
+        }
+
+        .inferno-button:hover::before {
+            animation: shine 1.5s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -50%; }
+            100% { left: 150%; }
+        }
+
+        .button-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--hell-orange);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .button-desc {
+            color: #aaa;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Эффект "глаз демона" в футере */
+        .demon-eye {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--accent-color) 0%, #800000 70%, transparent 80%);
+            border-radius: 50%;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            filter: blur(2px) drop-shadow(0 0 15px var(--accent-color));
+            animation: eyePulse 4s infinite alternate;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes eyePulse {
+            0% { transform: scale(1); opacity: 0.3; filter: blur(2px) drop-shadow(0 0 10px var(--accent-color)); }
+            50% { filter: blur(3px) drop-shadow(0 0 20px var(--hell-orange)); }
+            100% { transform: scale(1.1); opacity: 0.5; filter: blur(2px) drop-shadow(0 0 15px var(--accent-color)); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .inferno-button {
+                padding: 20px;
+            }
         }
     </style>
 </head>
-<body style="overflow-x:hidden;overflow-y:hidden">
-<div id="main">
-    <canvas id="c1" width="1024" height="1024">
-        <span>不支持canvas浏览器</span>
-    </canvas>
-</div>
-    <button id="btn">CONFIG</button>
-    <div id="config">
-        <textarea name="" id="kernel" cols="30" rows="10"></textarea>
-        <br />
-        <button id="apply">APPLY</button>
-        <button id="cancle">CANCLE</button>
+<body>
+    <!-- Лоадер -->
+    <div class="loader" id="loader">
+        <div class="hell-cube">
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+            <div class="hell-cube-face"></div>
+        </div>
+        <div class="loader-text">ЗАГРУЗКА АДА...</div>
     </div>
-    <script>
-    var cx, cy;
-    var glposition;
-    var glright;
-    var glforward;
-    var glup;
-    var glorigin;
-    var glx;
-    var gly;
-    var gllen;
-    var canvas;
-    var gl;
-    var date = new Date();
-    var md = 0,mx,my;
-    var t2,t1 = date.getTime();
-    var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
-    var ml = 0, mr = 0, mm = 0;
-    var len = 1.6;
-    var ang1 = 2.8;
-    var ang2 = 0.4;
-    var cenx = 0.0;
-    var ceny = 0.0;
-    var cenz = 0.0;
-        var KERNEL = "float kernal(vec3 ver){\n" +
-            "   vec3 a;\n" +
-            "float b,c,d,e;\n" +
-            "   a=ver;\n" +
-            "   for(int i=0;i<5;i++){\n" +
-            "       b=length(a);\n" +
-            "       c=atan(a.y,a.x)*8.0;\n" +
-            "       e=1.0/b;\n" +
-            "       d=acos(a.z/b)*8.0;\n" +
-            "       b=pow(b,8.0);\n" +
-            "       a=vec3(b*sin(d)*cos(c),b*sin(d)*sin(c),b*cos(d))+ver;\n" +
-            "       if(b>6.0){\n" +
-            "           break;\n" +
-            "       }\n" +
-            "   }" +
-            "   return 4.0-a.x*a.x-a.y*a.y-a.z*a.z;" +
-            "}";
-    var vertshade;
-    var fragshader;
-    var shaderProgram;
-    function ontimer() {
-        ang1+=0.01;
-        draw();
-        window.requestAnimationFrame(ontimer);
-    }
-    document.addEventListener("mousedown",
-        function (ev) {
-            var oEvent = ev || event;
-            if (oEvent.button == 0) {
-                ml = 1;
-                mm = 0;
-            }
-            if (oEvent.button == 2) {
-                mr = 1;
-                mm = 0;
-            }
-            mx = oEvent.clientX;
-            my = oEvent.clientY;
-        },
-        false);
-    document.addEventListener("mouseup",
-        function (ev) {
-            var oEvent = ev || event;
-            if (oEvent.button == 0) {
-                ml = 0;
-            }
-            if (oEvent.button == 2) {
-                mr = 0;
-            }
-        },
-        false);
-    document.addEventListener("mousemove",
-        function (ev) {
-        var oEvent = ev || event;
-        if (ml == 1) {
-            ang1 += (oEvent.clientX - mx) * 0.002;
-            ang2 += (oEvent.clientY - my) * 0.002;
-            if (oEvent.clientX != mx || oEvent.clientY != my) {
-                mm = 1;
-            }
-        }
-        if (mr == 1) {
-            var l = len * 4.0 / (cx + cy);
-            cenx += l * (-(oEvent.clientX - mx) * Math.sin(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.cos(ang1));
-            ceny += l * ((oEvent.clientY - my) * Math.cos(ang2));
-            cenz += l * ((oEvent.clientX - mx) * Math.cos(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.sin(ang1));
-            if (oEvent.clientX != mx || oEvent.clientY != my) {
-                mm = 1;
-            }
-        }
-        mx = oEvent.clientX;
-        my = oEvent.clientY;
-        },
-        false);
-    document.addEventListener("mousewheel",
-        function (ev) {
-            ev.preventDefault();
-            var oEvent = ev || event;
-            len *= Math.exp(-0.001 * oEvent.wheelDelta);
-        },
-        false);
-    document.addEventListener("touchstart",
-        function (ev) {
-            var n = ev.touches.length;
-            if (n == 1) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }
-            else if (n == 2) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                oEvent = ev.touches[1];
-                mx1 = oEvent.clientX;
-                my1 = oEvent.clientY;
-            }
-            lasttimen = n;
-        },
-        false);
-    document.addEventListener("touchend",
-        function (ev) {
-            var n = ev.touches.length;
-            if (n == 1) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }
-            else if (n == 2) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                oEvent = ev.touches[1];
-                mx1 = oEvent.clientX;
-                my1 = oEvent.clientY;
-            }
-            lasttimen = n;
-        },
-        false);
-    document.addEventListener("touchmove",
-        function (ev) {
-            ev.preventDefault();
-            var n = ev.touches.length;
-            if (n == 1&&lasttimen==1) {
-                var oEvent = ev.touches[0];
-                ang1 += (oEvent.clientX - mx) * 0.002;
-                ang2 += (oEvent.clientY - my) * 0.002;
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }
-            else if (n == 2) {
-                var oEvent = ev.touches[0];
-                var oEvent1 = ev.touches[1];
-                var l = len * 2.0 / (cx + cy), l1;
-                cenx += l * (-(oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.sin(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.cos(ang1));
-                ceny += l * ((oEvent.clientY + oEvent1.clientY - my - my1) * Math.cos(ang2));
-                cenz += l * ((oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.cos(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.sin(ang1));
-                l1 = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1)+1.0);
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                mx1 = oEvent1.clientX;
-                my1 = oEvent1.clientY;
-                l = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
-                len *= l1 / l;
-            }
-            lasttimen = n;
-        },
-        false);
-    document.oncontextmenu = function (event) {
-        if (mm == 1) {
-            event.preventDefault();
-        }
-    };
-    function draw() {
-        date = new Date();
-        var t2 = date.getTime();
-        //ang1 += (t2 - t1)*0.001;
-        t1 = t2;
-        //ang1 += 0.1;
-        gl.uniform1f(glx, cx * 2.0 / (cx + cy));
-        gl.uniform1f(gly, cy * 2.0 / (cx + cy));
-        gl.uniform1f(gllen, len);
-        gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
-        gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
-        gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
-        gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-        gl.finish();
-    }
-    window.onresize = function () {
-        cx = document.body.clientWidth;
-        cy = document.body.clientHeight;
-        if(cx>cy){
-            cx=cy;
-        }
-        else{
-            cy=cx;
-        }
-        document.getElementById("main").style.width=1024+"px";
-        document.getElementById("main").style.height=1024+"px";
-        document.getElementById("main").style.transform="scale("+cx/1024+","+cy/1024+")";
-    }
-    window.onload = function () {
-        cx = document.body.clientWidth;
-        cy = document.body.clientHeight;
-        if(cx>cy){
-            cx=cy;
-        }
-        else{
-            cy=cx;
-        }
-        document.getElementById("main").style.width=1024+"px";
-        document.getElementById("main").style.height=1024+"px";
-        document.getElementById("main").style.transform="scale("+cx/1024+","+cy/1024+")";
-        var positions = [-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0, 0.0];
-        var VSHADER_SOURCE =
-            "#version 100 \n"+
-            "precision highp float;\n" +
-            "attribute vec4 position;" +
-            "varying vec3 dir, localdir;" +
-            "uniform vec3 right, forward, up, origin;" +
-            "uniform float x,y;" +
-            "void main() {" +
-            "   gl_Position = position; " +
-            "   dir = forward + right * position.x*x + up * position.y*y;" +
-            "   localdir.x = position.x*x;" +
-            "   localdir.y = position.y*y;" +
-            "   localdir.z = -1.0;" +
-            "} ";
-        var FSHADER_SOURCE =
-            "#version 100 \n" +
-            "#define PI 3.14159265358979324\n" +
-            "#define M_L 0.3819660113\n" +
-            "#define M_R 0.6180339887\n" +
-            "#define MAXR 8\n" +
-            "#define SOLVER 8\n" +
-            "precision highp float;\n" +
-            "float kernal(vec3 ver)\n;" +
-            "uniform vec3 right, forward, up, origin;\n" +
-            "varying vec3 dir, localdir;\n" +
-            "uniform float len;\n" +
-            "vec3 ver;\n" +
-            "int sign;"+
-            "float v, v1, v2;\n" +
-            "float r1, r2, r3, r4, m1, m2, m3, m4;\n" +
-            "vec3 n, reflect;\n" +
-            "const float step = 0.002;\n" +
-            "vec3 color;\n" +
-            "void main() {\n" +
-            "   color.r=0.0;\n" +
-            "   color.g=0.0;\n" +
-            "   color.b=0.0;\n" +
-            "   sign=0;"+
-            "   v1 = kernal(origin + dir * (step*len));\n" +
-            "   v2 = kernal(origin);\n" +
-            "   for (int k = 2; k < 1002; k++) {\n" +
-            "      ver = origin + dir * (step*len*float(k));\n" +
-            "      v = kernal(ver);\n" +
-            "      if (v > 0.0 && v1 < 0.0) {\n" +
-            "         r1 = step * len*float(k - 1);\n" +
-            "         r2 = step * len*float(k);\n" +
-            "         m1 = kernal(origin + dir * r1);\n" +
-            "         m2 = kernal(origin + dir * r2);\n" +
-            "         for (int l = 0; l < SOLVER; l++) {\n" +
-            "            r3 = r1 * 0.5 + r2 * 0.5;\n" +
-            "            m3 = kernal(origin + dir * r3);\n" +
-            "            if (m3 > 0.0) {\n" +
-            "               r2 = r3;\n" +
-            "               m2 = m3;\n" +
-            "            }\n" +
-            "            else {\n" +
-            "               r1 = r3;\n" +
-            "               m1 = m3;\n" +
-            "            }\n" +
-            "         }\n" +
-            "         if (r3 < 2.0 * len) {\n" +
-            "               sign=1;" +
-            "            break;\n" +
-            "         }\n" +
-            "      }\n" +
-            "      if (v < v1&&v1>v2&&v1 < 0.0 && (v1*2.0 > v || v1 * 2.0 > v2)) {\n" +
-            "         r1 = step * len*float(k - 2);\n" +
-            "         r2 = step * len*(float(k) - 2.0 + 2.0*M_L);\n" +
-            "         r3 = step * len*(float(k) - 2.0 + 2.0*M_R);\n" +
-            "         r4 = step * len*float(k);\n" +
-            "         m2 = kernal(origin + dir * r2);\n" +
-            "         m3 = kernal(origin + dir * r3);\n" +
-            "         for (int l = 0; l < MAXR; l++) {\n" +
-            "            if (m2 > m3) {\n" +
-            "               r4 = r3;\n" +
-            "               r3 = r2;\n" +
-            "               r2 = r4 * M_L + r1 * M_R;\n" +
-            "               m3 = m2;\n" +
-            "               m2 = kernal(origin + dir * r2);\n" +
-            "            }\n" +
-            "            else {\n" +
-            "               r1 = r2;\n" +
-            "               r2 = r3;\n" +
-            "               r3 = r4 * M_R + r1 * M_L;\n" +
-            "               m2 = m3;\n" +
-            "               m3 = kernal(origin + dir * r3);\n" +
-            "            }\n" +
-            "         }\n" +
-            "         if (m2 > 0.0) {\n" +
-            "            r1 = step * len*float(k - 2);\n" +
-            "            r2 = r2;\n" +
-            "            m1 = kernal(origin + dir * r1);\n" +
-            "            m2 = kernal(origin + dir * r2);\n" +
-            "            for (int l = 0; l < SOLVER; l++) {\n" +
-            "               r3 = r1 * 0.5 + r2 * 0.5;\n" +
-            "               m3 = kernal(origin + dir * r3);\n" +
-            "               if (m3 > 0.0) {\n" +
-            "                  r2 = r3;\n" +
-            "                  m2 = m3;\n" +
-            "               }\n" +
-            "               else {\n" +
-            "                  r1 = r3;\n" +
-            "                  m1 = m3;\n" +
-            "               }\n" +
-            "            }\n" +
-            "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
-            "                   sign=1;" +
-            "               break;\n" +
-            "            }\n" +
-            "         }\n" +
-            "         else if (m3 > 0.0) {\n" +
-            "            r1 = step * len*float(k - 2);\n" +
-            "            r2 = r3;\n" +
-            "            m1 = kernal(origin + dir * r1);\n" +
-            "            m2 = kernal(origin + dir * r2);\n" +
-            "            for (int l = 0; l < SOLVER; l++) {\n" +
-            "               r3 = r1 * 0.5 + r2 * 0.5;\n" +
-            "               m3 = kernal(origin + dir * r3);\n" +
-            "               if (m3 > 0.0) {\n" +
-            "                  r2 = r3;\n" +
-            "                  m2 = m3;\n" +
-            "               }\n" +
-            "               else {\n" +
-            "                  r1 = r3;\n" +
-            "                  m1 = m3;\n" +
-            "               }\n" +
-            "            }\n" +
-            "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
-            "                   sign=1;" +
-            "               break;\n" +
-            "            }\n" +
-            "         }\n" +
-            "      }\n" +
-            "      v2 = v1;\n" +
-            "      v1 = v;\n" +
-            "   }\n" +
-            "   if (sign==1) {\n" +
-            "      ver = origin + dir*r3 ;\n" +
-                "       r1=ver.x*ver.x+ver.y*ver.y+ver.z*ver.z;" +
-            "      n.x = kernal(ver - right * (r3*0.00025)) - kernal(ver + right * (r3*0.00025));\n" +
-            "      n.y = kernal(ver - up * (r3*0.00025)) - kernal(ver + up * (r3*0.00025));\n" +
-            "      n.z = kernal(ver + forward * (r3*0.00025)) - kernal(ver - forward * (r3*0.00025));\n" +
-            "      r3 = n.x*n.x+n.y*n.y+n.z*n.z;\n" +
-            "      n = n * (1.0 / sqrt(r3));\n" +
-            "      ver = localdir;\n" +
-            "      r3 = ver.x*ver.x+ver.y*ver.y+ver.z*ver.z;\n" +
-            "      ver = ver * (1.0 / sqrt(r3));\n" +
-            "      reflect = n * (-2.0*dot(ver, n)) + ver;\n" +
-            "      r3 = reflect.x*0.276+reflect.y*0.920+reflect.z*0.276;\n" +
-            "      r4 = n.x*0.276+n.y*0.920+n.z*0.276;\n" +
-            "      r3 = max(0.0,r3);\n" +
-            "      r3 = r3 * r3*r3*r3;\n" +
-            "      r3 = r3 * 0.45 + r4 * 0.25 + 0.3;\n" +
-                "      n.x = sin(r1*10.0)*0.5+0.5;\n" +
-                "      n.y = sin(r1*10.0+2.05)*0.5+0.5;\n" +
-                "      n.z = sin(r1*10.0-2.05)*0.5+0.5;\n" +
-            "      color = n*r3;\n" +
-            "   }\n" +
-            "   gl_FragColor = vec4(color.x, color.y, color.z, 1.0);" +
-            "}";
-        canvas = document.getElementById('c1');
-        gl = canvas.getContext('webgl');
-        vertshader = gl.createShader(gl.VERTEX_SHADER);
-        fragshader = gl.createShader(gl.FRAGMENT_SHADER);
-        shaderProgram = gl.createProgram();
-        gl.shaderSource(vertshader, VSHADER_SOURCE);
-        gl.compileShader(vertshader);
-        var infov = gl.getShaderInfoLog(vertshader);
-        gl.shaderSource(fragshader, FSHADER_SOURCE + KERNEL);
-        gl.compileShader(fragshader);
-        var infof = gl.getShaderInfoLog(fragshader);
-        gl.attachShader(shaderProgram, vertshader);
-        gl.attachShader(shaderProgram, fragshader);
-        gl.linkProgram(shaderProgram);
-        gl.useProgram(shaderProgram);
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            var info = gl.getProgramInfoLog(shaderProgram);
-            throw 'Could not compile WebGL program. \n\n' + infov + infof + info;
-        }
-        glposition = gl.getAttribLocation(shaderProgram, 'position');
-        glright = gl.getUniformLocation(shaderProgram, 'right');
-        glforward = gl.getUniformLocation(shaderProgram, 'forward');
-        glup = gl.getUniformLocation(shaderProgram, 'up');
-        glorigin = gl.getUniformLocation(shaderProgram, 'origin');
-        glx = gl.getUniformLocation(shaderProgram, 'x');
-        gly = gl.getUniformLocation(shaderProgram, 'y');
-        gllen = gl.getUniformLocation(shaderProgram, 'len');
-        var buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(glposition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(glposition);
 
-        gl.viewport(0, 0, 1024, 1024);
-        draw();
-        window.requestAnimationFrame(ontimer);
-        document.getElementById("kernel").value = KERNEL;
-        document.getElementById("btn").addEventListener("click", function() {
-            var state = this.innerText == "CONFIG";
-            this.innerText = state ? "HIDE" : "CONFIG";
-            document.getElementById("config").style.display = state ? "inline" : "none";
+    <!-- Текстура "лавовых трещин" -->
+    <div class="hell-cracks"></div>
+
+    <!-- Глаз демона (фон) -->
+    <div class="demon-eye"></div>
+
+    <div class="container">
+        <header>
+            <h1>SHIMA</h1>
+            <p class="subtitle">ИНФЕРНАЛЬНЫЙ ИНТЕРФЕЙС</p>
+            <div class="lava-river"></div>
+        </header>
+
+        <div class="button-grid">
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/ShimaAttack')">
+                <div class="button-title">АДАПТЕР</div>
+                <div class="button-desc">Наш публичный адаптер со всеми ссылками</div>
+            </div>
+
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/+hj480VhOjIFhMzU0')">
+                <div class="button-title">КАНАЛ</div>
+                <div class="button-desc">Все главное тут</div>
+            </div>
+
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/boost?c=2515069880')">
+                <div class="button-title">БУСТ</div>
+                <div class="button-desc">Поддержать нас</div>
+            </div>
+
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/+5L07CLn3bOgyYjc8')">
+                <div class="button-title">ЧАТ</div>
+                <div class="button-desc">Наш чат для обсуждения</div>
+            </div>
+
+            <div class="inferno-button" onclick="loadThenRedirect('https://t.me/addemoji/ShimaAttack')">
+                <div class="button-title">EMOJI</div>
+                <div class="button-desc">Наши премиум эмодзи</div>
+            </div>
+
+            <div class="inferno-button" onclick="loadThenAction()">
+                <div class="button-title">Shima</div>
+                <div class="button-desc">Лучший проект по наказанию скамеров</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Скрываем лоадер через 3 секунды
+        setTimeout(() => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+            }, 500);
+        }, 3000);
+
+        // Функция загрузки + редирект
+        function loadThenRedirect(url) {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            
+            setTimeout(() => {
+                window.location.href = url;
+            }, 2000);
+        }
+
+        // Функция загрузки + действие
+        function loadThenAction() {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    alert("Добро пожаловать в ад...");
+                }, 500);
+            }, 2000);
+        }
+
+        // Анимация кнопок при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.inferno-button');
+            buttons.forEach((btn, index) => {
+                setTimeout(() => {
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
         });
-        document.getElementById("apply").addEventListener("click", function() {
-            KERNEL = document.getElementById("kernel").value;
-            gl.shaderSource(fragshader, FSHADER_SOURCE + KERNEL);
-            gl.compileShader(fragshader);
-            var infof = gl.getShaderInfoLog(fragshader);
-            gl.linkProgram(shaderProgram);
-            gl.useProgram(shaderProgram);
-            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                var info = gl.getProgramInfoLog(shaderProgram);
-                alert(infof + info);
-            }
-            glposition = gl.getAttribLocation(shaderProgram, 'position');
-            glright = gl.getUniformLocation(shaderProgram, 'right');
-            glforward = gl.getUniformLocation(shaderProgram, 'forward');
-            glup = gl.getUniformLocation(shaderProgram, 'up');
-            glorigin = gl.getUniformLocation(shaderProgram, 'origin');
-            glx = gl.getUniformLocation(shaderProgram, 'x');
-            gly = gl.getUniformLocation(shaderProgram, 'y');
-            gllen = gl.getUniformLocation(shaderProgram, 'len');
-        });
-        document.getElementById("cancle").addEventListener("click", function() {
-            document.getElementById("kernel").value = KERNEL;
-        });
-    }
     </script>
 </body>
 </html>
