@@ -45,7 +45,7 @@
             position: relative;
         }
 
-        /* Лоадер (адский куб) */
+
         .loader {
             position: fixed;
             top: 0;
@@ -105,7 +105,7 @@
             100% { opacity: 1; }
         }
 
-        /* Анимированная текстура "лавовых трещин" */
+
         .hell-cracks {
             position: fixed;
             top: 0;
@@ -125,7 +125,7 @@
             100% { background-position: 1000px 1000px; }
         }
 
-        /* Главный контейнер */
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -140,7 +140,6 @@
             to { opacity: 1; }
         }
 
-        /* Заголовок с эффектом "раскаленного металла" */
         header {
             text-align: center;
             margin-bottom: 60px;
@@ -173,7 +172,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        /* Эффект "лавовой реки" под заголовком */
+
         .lava-river {
             width: 300px;
             height: 3px;
@@ -199,8 +198,6 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
-
-        /* Сетка кнопок (ультра-стильные) */
         .button-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -267,7 +264,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        /* Эффект "глаз демона" в футере */
+
         .demon-eye {
             width: 100px;
             height: 100px;
@@ -288,7 +285,6 @@
             100% { transform: scale(1.1); opacity: 0.5; filter: blur(2px) drop-shadow(0 0 15px var(--accent-color)); }
         }
 
-        /* Адаптивность */
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5rem;
@@ -305,7 +301,7 @@
     </style>
 </head>
 <body>
-    <!-- Лоадер -->
+
     <div class="loader" id="loader">
         <div class="hell-cube">
             <div class="hell-cube-face"></div>
@@ -315,19 +311,17 @@
             <div class="hell-cube-face"></div>
             <div class="hell-cube-face"></div>
         </div>
-        <div class="loader-text">ЗАГРУЗКА АДА...</div>
+        <div class="loader-text">ЗАГРУЗКА...</div>
     </div>
 
-    <!-- Текстура "лавовых трещин" -->
     <div class="hell-cracks"></div>
 
-    <!-- Глаз демона (фон) -->
     <div class="demon-eye"></div>
 
     <div class="container">
         <header>
             <h1>SHIMA</h1>
-            <p class="subtitle">ИНФЕРНАЛЬНЫЙ ИНТЕРФЕЙС</p>
+            <p class="subtitle">Очищение</p>
             <div class="lava-river"></div>
         </header>
 
@@ -365,7 +359,6 @@
     </div>
 
     <script>
-        // Скрываем лоадер через 3 секунды
         setTimeout(() => {
             document.getElementById('loader').style.opacity = '0';
             setTimeout(() => {
@@ -373,7 +366,6 @@
             }, 500);
         }, 3000);
 
-        // Функция загрузки + редирект
         function loadThenRedirect(url) {
             const loader = document.getElementById('loader');
             loader.style.display = 'flex';
@@ -384,7 +376,7 @@
             }, 2000);
         }
 
-        // Функция загрузки + действие
+     
         function loadThenAction() {
             const loader = document.getElementById('loader');
             loader.style.display = 'flex';
@@ -399,7 +391,6 @@
             }, 2000);
         }
 
-        // Анимация кнопок при загрузке
         document.addEventListener('DOMContentLoaded', () => {
             const buttons = document.querySelectorAll('.inferno-button');
             buttons.forEach((btn, index) => {
