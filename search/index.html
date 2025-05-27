@@ -3,12 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Поиск</title>
+    <title>🔍 Поиск по номеру</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --border: rgba(0,0,0,0.1);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        h1 {
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .result-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 0.8rem;
+        }
+        
+        .data-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        .map-container {
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+        }
+        
+        .copy-btn {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            background: var(--light);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .raw-data {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .data-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            button {
+                padding: 0.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Страница поиска</h1>
-    <p>Здесь будет функционал поиска.</p>
-    <a href="/">Вернуться на главную</a>
-</body>
-</html>
+    <div class="container">
+        <header>
+            <div class="logo">🔍</div>
+            <h1>Поиск по номеру</h1>
+        </header>
+        
+        <div class="search-box">
+            <div class="input-group">
+                <input type="tel" id="phone" placeholder="Введите номер (11 цифр)" pattern="[0-9]{11}">
+                <button onclick="getGeoData()">Найти</button>
+            </div>
+        </div>
+        
+        <div id="loading" style="display: none;">Поиск данных...</div>
+        
+        <div id="results"></div>
+    </div>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+        let map;
+        let phoneData = {};
+        let osmData = {};
+        
+        async function getGeoData() {
+            const phone = document.getElementById('phone').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const loading = document.getElementById('loading');
+            
+            if (!phone || phone.length !== 11 || !/^\d+$/.test(phone)) {
+                alert('Введите 11 цифр номера');
+                return;
+            }
+            
+            resultsDiv.innerHTML = '';
+            loading.style.display = 'block';
+            
+            try {
+                const phoneResponse = await fetch(`https://htmlweb.ru/geo/api.php?json&telcod=${phone}`);
+                phoneData = await phoneResponse.json();
+                
+                if (phoneData.latitude && phoneData.longitude) {
+                    const osmResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${phoneData.latitude}&lon=${phoneData.longitude}&format=jsonv2`);
+                    osmData = await osmResponse.json();
+                }
+                
+                renderResults();
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-title">Ошибка</div>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function renderResults() {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = `
+                <div class="result-card">
+                    <div class="result-title">📱 Номер</div>
+                    <div class="data-grid">
+                        <div class="data-label">Номер:</div>
+                        <div>+7 ${formatPhone(document.getElementById('phone').value)}</div>
+                        
+                        <div class="data-label">Тип:</div>
+                        <div>${phoneData.mobile ? 'Мобильный' : 'Стационарный'}</div>
+            `;
+            
+            if (phoneData.oper) {
+                html += `
+                    <div class="data-label">Оператор:</div>
+                    <div>${phoneData.oper}${phoneData.oper_brand ? ` (${phoneData.oper_brand})` : ''}</div>
+                `;
+            }
+            
+            html += `</div></div>`;
+            
+            html += `
+                <div class="result-card">
+                    <div class="result-title">🗺️ Локация</div>
+                    <div class="data-grid">
+                        <div class="data-label">Страна:</div>
+                        <div>${phoneData.country?.name || '—'}</div>
+                        
+                        <div class="data-label">Регион:</div>
+                        <div>${phoneData.region?.name || '—'}</div>
+                        
+                        <div class="data-label">Город:</div>
+                        <div>${phoneData.city || '—'}</div>
+                        
+                        <div class="data-label">Координаты:</div>
+                        <div>${phoneData.latitude || '—'}, ${phoneData.longitude || '—'}</div>
+                    </div>
+            `;
+            
+            if (phoneData.latitude && phoneData.longitude) {
+                html += `
+                    <div class="map-container" id="map"></div>
+                `;
+            }
+            
+            html += `</div>`;
+            
+            if (osmData.address) {
+                html += `
+                    <div class="result-card">
+                        <div class="result-title">🏠 Адрес</div>
+                        <div class="data-grid">
+                            <div class="data-label">Полный адрес:</div>
+                            <div>${osmData.display_name || '—'}</div>
+                            
+                            <div class="data-label">Улица:</div>
+                            <div>${osmData.address.road || '—'}</div>
+                            
+                            <div class="data-label">Дом:</div>
+                            <div>${osmData.address.house_number || '—'}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="result-card">
+                    <div class="result-title">📄 Данные</div>
+                    <div class="tabs">
+                        <div class="tab active" onclick="showTab('phoneData')">Данные номера</div>
+                        <div class="tab" onclick="showTab('osmData')" ${!osmData.address ? 'disabled' : ''}>Данные OSM</div>
+                    </div>
+                    <div id="phoneData" class="raw-data">${JSON.stringify(phoneData, null, 2)}</div>
+                    <div id="osmData" class="raw-data" style="display:none">${osmData.address ? JSON.stringify(osmData, null, 2) : 'Нет данных'}</div>
+                    <button class="copy-btn" onclick="copyData()">Копировать JSON</button>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+            
+            if (phoneData.latitude && phoneData.longitude) {
+                initMap(phoneData.latitude, phoneData.longitude);
+            }
+        }
+        
+        function formatPhone(phone) {
+            return phone.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '$1 $2 $3 $4');
+        }
+        
+        function initMap(lat, lon) {
+            if (map) map.remove();
+            
+            map = L.map('map').setView([lat, lon], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            
+            L.marker([lat, lon]).addTo(map)
+                .bindPopup(`<b>${phoneData.city || 'Локация'}</b>`)
+                .openPopup();
+        }
+        
+        function showTab(tabId) {
+            document.querySelectorAll('.raw-data').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+        
+        function copyData() {
+            const activeTab = document.querySelector('.raw-data[style="display: block;"]') || document.getElementById('phoneData');
+            navigator.clipboard.writeText(activeTab.textContent);
+            
+            const btn = event.target;
+            btn.textContent = 'Скопировано!';
+            setTimeout(() => btn.textContent = 'Копировать JSON', 2000);
+        }
+        
+        document.getElementById('phone').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 11);
+        });
+    </script>
+</body>
+    </html>
