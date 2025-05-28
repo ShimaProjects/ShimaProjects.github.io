@@ -1,0 +1,168 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=no">
+    <title>volumeshader_bm EXTREME</title>
+    <style>
+        body { background: #000; margin: 0; overflow: hidden; }
+        canvas { display: block; width: 100%; height: 100%; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="ui">FPS: <span id="fps">0</span></div>
+
+    <script>
+        // Ультра-оптимизированный код для МАКСИМАЛЬНОЙ нагрузки
+        alert("WARNING: EXTREME GPU STRESS TEST\nYour device may overheat!");
+
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl', { antialias: false });
+        let fpsCounter = document.getElementById('fps');
+        let lastTime = 0, frameCount = 0;
+
+        // Динамическое разрешение (2K или выше)
+        canvas.width = window.innerWidth * 2;
+        canvas.height = window.innerHeight * 2;
+
+        // Супер-тяжелое ядро фрактала (в 5 раз сложнее)
+        const KERNEL = `
+            float kernal(vec3 ver) {
+                vec3 a = ver;
+                for(int i = 0; i < 25; i++) { // Было 5 → стало 25
+                    float b = length(a);
+                    float c = atan(a.y, a.x) * 16.0;
+                    float d = acos(a.z/b) * 16.0;
+                    b = pow(b, 8.0);
+                    a = vec3(b*sin(d)*cos(c), b*sin(d)*sin(c), b*cos(d)) + ver;
+                    if(b > 10.0) break;
+                }
+                return 4.0 - dot(a,a);
+            }
+        `;
+
+        // Ray marching с тройным отражением
+        const FRAGMENT_SHADER = `
+            precision highp float;
+            #define MAX_STEPS 256 // Было ~100 → стало 256
+            #define MAX_DIST 10.0
+            #define SURFACE_DIST 0.0001
+            #define REFLECTIONS 3 // Добавили рекурсивные отражения
+
+            ${KERNEL}
+
+            vec3 calcNormal(vec3 p) {
+                vec2 e = vec2(0.0001, 0);
+                return normalize(vec3(
+                    kernal(p + e.xyy) - kernal(p - e.xyy),
+                    kernal(p + e.yxy) - kernal(p - e.yxy),
+                    kernal(p + e.yyx) - kernal(p - e.yyx)
+                );
+            }
+
+            float rayMarch(vec3 ro, vec3 rd, out vec3 color) {
+                float dO = 0.0;
+                color = vec3(0);
+                for(int i = 0; i < MAX_STEPS; i++) {
+                    vec3 p = ro + rd * dO;
+                    float dS = kernal(p);
+                    dO += dS;
+                    if(dO > MAX_DIST || abs(dS) < SURFACE_DIST * dO) break;
+                }
+                return dO;
+            }
+
+            vec3 render(vec3 ro, vec3 rd) {
+                vec3 col = vec3(0);
+                float reflectivity = 1.0;
+                
+                for(int i = 0; i < REFLECTIONS; i++) {
+                    vec3 hitColor;
+                    float d = rayMarch(ro, rd, hitColor);
+                    if(d >= MAX_DIST) break;
+                    
+                    vec3 p = ro + rd * d;
+                    vec3 n = calcNormal(p);
+                    vec3 lightDir = normalize(vec3(1,2,3));
+                    float diff = max(0.0, dot(n, lightDir));
+                    
+                    // Освещение + фоновый шум
+                    col += hitColor + diff * reflectivity;
+                    reflectivity *= 0.5;
+                    
+                    // Новый луч для отражения
+                    ro = p + n * SURFACE_DIST * 2.0;
+                    rd = reflect(rd, n);
+                }
+                return col;
+            }
+
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - 0.5*vec2(${canvas.width}, ${canvas.height})) / ${canvas.height};
+                vec3 ro = vec3(3.0 * sin(iTime), 2.0, 3.0 * cos(iTime));
+                vec3 rd = normalize(vec3(uv, -1.0));
+                gl_FragColor = vec4(render(ro, rd), 1.0);
+            }
+        `;
+
+        // WebGL инициализация
+        const shaderProgram = gl.createProgram();
+        const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vertexShader, `
+            attribute vec2 position;
+            void main() {
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+        `);
+        gl.compileShader(vertexShader);
+        
+        const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fragmentShader, FRAGMENT_SHADER);
+        gl.compileShader(fragmentShader);
+        
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+        gl.useProgram(shaderProgram);
+
+        // Fullscreen quad
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+        const positionLoc = gl.getAttribLocation(shaderProgram, "position");
+        gl.enableVertexAttribArray(positionLoc);
+        gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+        // Анимация
+        let iTime = 0;
+        function render() {
+            gl.uniform1f(gl.getUniformLocation(shaderProgram, "iTime"), iTime);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            
+            iTime += 0.01;
+            frameCount++;
+            const now = performance.now();
+            if (now - lastTime >= 1000) {
+                fpsCounter.textContent = (frameCount * 1000 / (now - lastTime)).toFixed(1);
+                frameCount = 0;
+                lastTime = now;
+            }
+            requestAnimationFrame(render);
+        }
+        render();
+
+        // Защита от перегрева (авто-пауза при 10 FPS)
+        let lastFpsCheck = 0;
+        setInterval(() => {
+            const fps = parseFloat(fpsCounter.textContent);
+            if (fps < 10 && performance.now() - lastFpsCheck > 5000) {
+                alert("GPU OVERHEAT! Reducing load...");
+                canvas.width /= 2;
+                canvas.height /= 2;
+                lastFpsCheck = performance.now();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
